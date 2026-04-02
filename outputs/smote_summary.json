@@ -1,0 +1,12 @@
+{
+  "before_smote": {
+    "legitimate": 227451,
+    "fraud": 394,
+    "fraud_ratio": 0.001729245759178389
+  },
+  "after_smote": {
+    "legitimate": 227451,
+    "fraud": 22745,
+    "fraud_ratio": 0.09090872755759484
+  }
+}
