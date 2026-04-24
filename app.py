@@ -205,6 +205,8 @@ st.markdown(
 )
 
 card_cols = st.columns(4)
+clicked_model = None  # track which card was tapped this run
+
 for col, model_name in zip(card_cols, model_options):
     is_active = model_name == selected_model
     row = model_table.loc[model_name]
@@ -220,10 +222,15 @@ for col, model_name in zip(card_cols, model_options):
         ),
         unsafe_allow_html=True,
     )
-    if col.button("Use this model", key=f"pick_{model_name}"):
-        # Safe to set: no widget owns 'selected_model'
-        st.session_state["selected_model"] = model_name
-        # No st.rerun() needed — button click auto-triggers a rerun
+    # use_container_width makes the button full-width under the card
+    if col.button("Use this model", key=f"pick_{model_name}", use_container_width=True):
+        clicked_model = model_name  # note which was tapped, don't rerun yet
+
+# After ALL 4 cards are rendered, switch model and rerun once (single tap)
+if clicked_model is not None:
+    st.session_state["selected_model"] = clicked_model
+    st.rerun()
+
 
 default_threshold = float(np.clip(data["model_meta"]["xgb_best_threshold"], 0.1, 0.5))
 threshold = st.sidebar.slider(
