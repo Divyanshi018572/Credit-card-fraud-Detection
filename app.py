@@ -167,7 +167,13 @@ if "threshold" not in st.session_state:
     st.session_state["threshold"] = float(np.clip(data["model_meta"]["xgb_best_threshold"], 0.1, 0.5))
 
 st.sidebar.header("Model Controls")
-st.sidebar.radio("Choose model", model_options, key="selected_model")
+st.sidebar.radio(
+    "Choose model",
+    model_options,
+    index=model_options.index(st.session_state["selected_model"]),
+    key="_radio_selected_model",
+    on_change=lambda: st.session_state.update({"selected_model": st.session_state["_radio_selected_model"]}),
+)
 selected_model = st.session_state["selected_model"]
 
 model_table = data["model_table"].copy()
@@ -214,6 +220,7 @@ for col, model_name in zip(card_cols, model_options):
     )
     if col.button("Use this model", key=f"pick_{model_name}"):
         st.session_state["selected_model"] = model_name
+        st.session_state["_radio_selected_model"] = model_name
         st.rerun()
 
 default_threshold = float(np.clip(data["model_meta"]["xgb_best_threshold"], 0.1, 0.5))
