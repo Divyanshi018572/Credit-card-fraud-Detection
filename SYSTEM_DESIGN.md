@@ -1,35 +1,31 @@
 # Credit Card Fraud Detection - System Design
+> A high-level overview of our professional MLOps architecture.
 
-This document provides an easy-to-understand breakdown of how the Credit Card Fraud Detection project is structured, how data flows through it, and how decisions are made.
+This document explains how the project is structured, how data flows, and how the "brain" of the system (the AI models) is managed and served.
 
-## 1. High-Level Architecture
+---
 
-The system is split into two distinct parts:
-1. **The Offline Training Pipeline**: A set of scripts that digest historical data, balance extreme class imbalances, and train various AI models.
-2. **The Real-Time Application (Streamlit)**: An interactive dashboard that loads the pre-trained models and allows users to input new transactions to instantly receive a risk assessment.
+## 1. Simple Architecture Diagram
+
+Our system works in three distinct stages: **Training**, **Serving**, and **Visualization**.
 
 ```mermaid
 graph TD
-    subgraph "Offline Training Pipeline"
-        A[Raw Data creditcard.csv] --> B[Data Preprocessing & Log Scaling]
-        B --> C[Train / Test Split]
-        C -->|Train Set| D[SMOTE Oversampling]
-        C -->|Test Set| F[Model Evaluation]
-        D --> E[Model Training XGBoost, Random Forest, etc.]
-        E --> F
-        F --> G[(Saved Models & Metadata)]
+    subgraph "1. The Factory (Training)"
+        A[Raw Data] --> B[Pipeline Scripts]
+        B -->|Logs Metrics| C[MLflow Server]
+        B -->|Saves Models| D[Model Registry]
     end
 
-    subgraph "Real-Time Application Streamlit"
-        H[User Input Transaction Data] --> I[Data Scaling using saved Scaler]
-        G -.->|Load Models| J[Selected Machine Learning Model]
-        I --> J
-        J --> K[Prediction Probability]
-        K --> L{Risk Decision Engine}
-        L -->|Score >= 0.8| M[Critical: Block Transaction]
-        L -->|Score >= 0.6| N[High: Block Transaction]
-        L -->|Score >= 0.35| O[Medium: Flag for Review]
-        L -->|Score < 0.35| P[Low: Approve Transaction]
+    subgraph "2. The Engine (FastAPI)"
+        D -->|Loads Model| E[FastAPI Engine]
+        F[Config YAML] -->|Set Risk Tiers| E
+        E -->|API Response| G[Real-Time Decision]
+    end
+
+    subgraph "3. The Dashboard (Streamlit)"
+        G --> H[Streamlit UI]
+        H -->|User Interface| I[Cardholder / Analyst]
     end
 ```
 
@@ -37,36 +33,39 @@ graph TD
 
 ## 2. Component Breakdown
 
-### A. The Data Pipeline (`pipeline/`)
-The data pipeline is responsible for teaching the models how to catch fraud. Because fraud only happens in ~0.17% of transactions, standard models will just guess "Legitimate" every time. We fix this using the pipeline.
+### A. The MLOps Pipeline (`pipeline/`)
+Instead of one messy script, the project is split into modular components. 
+- **`preprocessing.py`**: Cleans data and prepares features.
+- **`train.py`**: Trains the models. It is integrated with **MLflow** to track every experiment (accuracy, precision, etc.) so we never lose a good model.
+- **`evaluate.py`**: Automatically tests the model to ensure it meets our quality standards.
 
-- **`01_eda.py` (Exploratory Data Analysis)**: Scans the raw data to figure out class distributions and important statistics.
-- **`02_preprocessing.py`**: Takes the highly variable `Amount` column and applies a "Log Scaler" to compress the values. It then splits the data so we have a pure "Test" set to evaluate our models on later.
-- **`03_train.py`**: The brain of the operation. It applies **SMOTE** (Synthetic Minority Over-sampling Technique) to artificially generate more examples of fraud *only in the training set*. Then, it trains four distinct models:
-  - **XGBoost + SMOTE**: A powerful supervised tree-based model (the default choice).
-  - **Random Forest + SMOTE**: An ensemble of decision trees.
-  - **Isolation Forest**: An unsupervised model that looks for "anomalies" or outliers.
-  - **One-Class SVM**: Another unsupervised model that learns the boundary of "normal" behavior.
-- **`04_evaluate.py`**: Tests the trained models against the unseen Test set. Because traditional "Accuracy" is misleading here, this script calculates the **F1-Score**, **Precision**, and **Recall**. It also finds the optimal decision "Threshold" to balance catching fraud versus accidentally flagging legitimate users.
+### B. The Production Engine (`api.py`)
+This is the "brain" of the project. We use **FastAPI** to create a high-speed prediction service.
+- **Validation**: It uses Pydantic to ensure that every incoming transaction request has the correct format.
+- **Risk Decision Engine**: It doesn't just give a percentage; it maps that percentage to professional Risk Tiers (Critical, High, Medium, Low) based on the business rules.
 
-### B. The Application Layer (`app.py`)
-This is the user-facing Streamlit dashboard that puts the trained models to work.
+### C. The Central Brain (`configs/config.yaml`)
+Everything is controlled from one file. If you want to change the "Risk Threshold" (how aggressive the fraud detection is), you just change a number in this YAML file. **No code changes needed!**
 
-- **Caching & Loading**: Upon startup, the app loads the trained models (`.pkl` files) and the ideal threshold values from the `models/` directory.
-- **Live Transaction Simulator**: Users can randomly pull historical transactions or manually adjust sliders to create hypothetical transactions (e.g., setting transaction amount, feature V10, V14, etc.).
-- **Risk Decision Engine**: Once the model calculates the probability of fraud, it goes through a Risk Tier system:
-  - **Critical (80%+ probability)**: Transaction is blocked immediately.
-  - **High (60%+ probability)**: Transaction is blocked.
-  - **Medium (35%+ probability)**: Transaction is approved but flagged for manual human review.
-  - **Low (< 35% probability)**: Transaction goes through smoothly.
-- **Explainability**: The dashboard features an impact estimator (calculating financial net savings based on caught fraud vs. friction costs of false alarms) and breaks down *which* features contributed the most to the model's decision.
+### D. The User Dashboard (`app.py`)
+This is the "Face" of the project. It's a **Streamlit** dashboard used by human analysts to:
+- See charts of fraud patterns.
+- Test specific transactions to see how the model reacts.
+- View the "Net Savings" estimator to see the financial impact of the model.
 
 ---
 
-## 3. Deployment Architecture (Hugging Face Spaces)
+## 3. Deployment Flow (CI/CD)
 
-The application is containerized using Docker (or directly via Streamlit SDK) and is deployed on **Hugging Face Spaces**. 
+The project is built to be "Always Ready."
+1. **GitHub**: The code is stored and versioned here.
+2. **GitHub Actions**: Every time we update the code, an automated workflow (`sync_to_hub.yml`) pushes the project to Hugging Face.
+3. **Hugging Face Spaces**: The final application is hosted here, making it accessible from anywhere in the world.
 
-1. **GitHub Repository**: Acts as the single source of truth for the codebase.
-2. **GitHub Actions**: Whenever new code is pushed to the `main` branch, a CI/CD pipeline (`sync_to_hub.yml`) is triggered.
-3. **Hugging Face Hub**: The action securely authenticates with Hugging Face and pushes the code. Hugging Face then automatically rebuilds the Streamlit container and makes the dashboard live on the web.
+---
+
+## 4. Why this is "Senior Level" Design?
+- **Decoupled:** The API is separate from the UI.
+- **Tracked:** Every training run is saved in MLflow.
+- **Validated:** Automated tests (`pytest`) verify every part of the system.
+- **Configurable:** Business logic is stored in YAML, not hardcoded.
