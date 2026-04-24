@@ -1,0 +1,43 @@
+{
+  "xgb_best_params": {
+    "xgb__subsample": 0.7,
+    "xgb__scale_pos_weight": 300,
+    "xgb__n_estimators": 300,
+    "xgb__max_depth": 5,
+    "xgb__learning_rate": 0.1
+  },
+  "xgb_best_cv_f1": 0.7523364900805699,
+  "xgb_best_threshold": 0.28500000000000003,
+  "xgb_global_best_threshold": 0.88,
+  "feature_columns": [
+    "V1",
+    "V2",
+    "V3",
+    "V4",
+    "V5",
+    "V6",
+    "V7",
+    "V8",
+    "V9",
+    "V10",
+    "V11",
+    "V12",
+    "V13",
+    "V14",
+    "V15",
+    "V16",
+    "V17",
+    "V18",
+    "V19",
+    "V20",
+    "V21",
+    "V22",
+    "V23",
+    "V24",
+    "V25",
+    "V26",
+    "V27",
+    "V28",
+    "log_Amount"
+  ]
+}

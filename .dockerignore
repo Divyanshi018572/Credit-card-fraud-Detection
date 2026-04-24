@@ -1,0 +1,17 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Not required for app runtime image
+pipeline
+data/raw
+data/processed/train.csv
+data/processed/features_preprocessed.csv
+data/processed/preprocessing_metadata.json
+
+# Local artifacts
+archive.zip

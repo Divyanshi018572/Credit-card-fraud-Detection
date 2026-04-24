@@ -1,0 +1,35 @@
+{
+  "best_model_by_f1": "Random Forest + SMOTE",
+  "best_model_by_pr_auc": "XGBoost + SMOTE + Threshold",
+  "xgb_threshold": 0.28500000000000003,
+  "metrics": {
+    "Isolation Forest": {
+      "F1": 0.3283582089552239,
+      "Recall": 0.336734693877551,
+      "Precision": 0.3203883495145631,
+      "PR_AUC": 0.1942164629732898,
+      "ROC_AUC": 0.9542013238891504
+    },
+    "One-Class SVM": {
+      "F1": 0.1333333333333333,
+      "Recall": 0.8469387755102041,
+      "Precision": 0.072362685265911,
+      "PR_AUC": 0.3451808742888745,
+      "ROC_AUC": 0.9456034735222172
+    },
+    "Random Forest + SMOTE": {
+      "F1": 0.7256637168141593,
+      "Recall": 0.8367346938775511,
+      "Precision": 0.640625,
+      "PR_AUC": 0.8433850673683752,
+      "ROC_AUC": 0.9822871326358344
+    },
+    "XGBoost + SMOTE + Threshold": {
+      "F1": 0.5117647058823529,
+      "Recall": 0.8877551020408163,
+      "Precision": 0.359504132231405,
+      "PR_AUC": 0.8586512410873072,
+      "ROC_AUC": 0.9801210263227408
+    }
+  }
+}
