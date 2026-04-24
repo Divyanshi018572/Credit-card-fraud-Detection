@@ -167,14 +167,16 @@ if "threshold" not in st.session_state:
     st.session_state["threshold"] = float(np.clip(data["model_meta"]["xgb_best_threshold"], 0.1, 0.5))
 
 st.sidebar.header("Model Controls")
-st.sidebar.radio(
+# No `key` on the radio: return value is read directly each run.
+# This means NO widget owns 'selected_model', so buttons can update it freely.
+radio_choice = st.sidebar.radio(
     "Choose model",
     model_options,
     index=model_options.index(st.session_state["selected_model"]),
-    key="_radio_selected_model",
-    on_change=lambda: st.session_state.update({"selected_model": st.session_state["_radio_selected_model"]}),
 )
-selected_model = st.session_state["selected_model"]
+# Sync radio choice → session state (safe: no widget owns 'selected_model')
+st.session_state["selected_model"] = radio_choice
+selected_model = radio_choice
 
 model_table = data["model_table"].copy()
 model_table.index = model_table.index.astype(str)
@@ -219,9 +221,9 @@ for col, model_name in zip(card_cols, model_options):
         unsafe_allow_html=True,
     )
     if col.button("Use this model", key=f"pick_{model_name}"):
+        # Safe to set: no widget owns 'selected_model'
         st.session_state["selected_model"] = model_name
-        st.session_state["_radio_selected_model"] = model_name
-        st.rerun()
+        # No st.rerun() needed — button click auto-triggers a rerun
 
 default_threshold = float(np.clip(data["model_meta"]["xgb_best_threshold"], 0.1, 0.5))
 threshold = st.sidebar.slider(
