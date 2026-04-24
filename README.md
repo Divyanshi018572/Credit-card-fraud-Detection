@@ -11,6 +11,14 @@ pinned: false
 # Credit Card Fraud Detection
 End-to-end machine learning project for extreme class imbalance fraud detection using the ULB Kaggle dataset (`creditcard.csv`) with no synthetic external dataset.
 
+## 🚀 Live App
+
+[![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Hugging%20Face-Live%20Demo-blue)](https://huggingface.co/spaces/Divya499/Credit-card-fraud_detection)
+
+> **Try it live:** [https://huggingface.co/spaces/Divya499/Credit-card-fraud_detection](https://huggingface.co/spaces/Divya499/Credit-card-fraud_detection)
+
+The interactive Streamlit dashboard lets you explore model performance, run real-time transaction risk scoring, and visualize fraud patterns across the dataset.
+
 ## High-Level System Design
 
 The project is split into two primary components: an offline machine learning pipeline for processing data and training models, and a real-time Streamlit application for transaction risk scoring.
