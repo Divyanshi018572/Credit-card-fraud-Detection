@@ -18,4 +18,5 @@ jobs:
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: huggingface-cli upload Divya499/Credit-card-fraud_detection . . --repo-type space
+        run: huggingface-cli upload Divya499/Credit-card-fraud_detection . . --repo-type space --exclude ".git/*" --exclude "__pycache__/*" --exclude ".github/*"
+
