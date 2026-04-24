@@ -1,3 +1,3 @@
-Model,F1
-Naive RF (No SMOTE),0.8743169398907104
-Best Pipeline (XGBoost+SMOTE+Threshold),0.5117647058823529
+version https://git-lfs.github.com/spec/v1
+oid sha256:279fec653c57ed58a4bc102e6c157e2589e0aec8bb67f3d99524a8d74d76761c
+size 107

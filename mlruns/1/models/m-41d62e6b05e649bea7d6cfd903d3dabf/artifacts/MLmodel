@@ -1,0 +1,23 @@
+artifact_path: file:///D:/DATA SCIENCE/divya_projects/fraud detection/08_fraud_detection/mlruns/1/models/m-41d62e6b05e649bea7d6cfd903d3dabf/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.3
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.5.1
+    skops_trusted_types: null
+mlflow_version: 3.11.1
+model_id: m-41d62e6b05e649bea7d6cfd903d3dabf
+model_size_bytes: 826218
+model_uuid: m-41d62e6b05e649bea7d6cfd903d3dabf
+prompts: null
+run_id: 94ef30472976466a9baa0064bb4e0735
+utc_time_created: '2026-04-24 12:15:58.375962'
