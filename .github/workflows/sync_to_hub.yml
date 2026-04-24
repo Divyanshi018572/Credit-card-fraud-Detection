@@ -15,4 +15,5 @@ jobs:
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push https://Divya499:$HF_TOKEN@huggingface.co/spaces/Divya499/Credit-card-fraud_detection main
+        run: git push --force https://Divya499:$HF_TOKEN@huggingface.co/spaces/Divya499/Credit-card-fraud_detection main
+
