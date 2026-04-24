@@ -9,7 +9,7 @@ import seaborn as sns
 import streamlit as st
 from sklearn.metrics import confusion_matrix
 
-from path_utils import MODELS_DIR, OUTPUTS_DIR, PROCESSED_DATA_DIR, RAW_DATA_DIR
+from path_utils import MODELS_DIR, OUTPUTS_DIR, PROCESSED_DATA_DIR
 
 
 st.set_page_config(
@@ -68,9 +68,7 @@ st.markdown(
 
 @st.cache_data
 def load_data() -> dict:
-    train_df = pd.read_csv(PROCESSED_DATA_DIR / "train.csv")
     test_df = pd.read_csv(PROCESSED_DATA_DIR / "test.csv")
-    raw_df = pd.read_csv(RAW_DATA_DIR / "creditcard.csv")
     model_table = pd.read_csv(OUTPUTS_DIR / "model_comparison_table.csv", index_col=0)
     threshold_df = pd.read_csv(OUTPUTS_DIR / "xgb_threshold_metrics.csv")
     naive_vs_smote = pd.read_csv(OUTPUTS_DIR / "naive_vs_smote_metrics.csv")
@@ -80,9 +78,7 @@ def load_data() -> dict:
     feature_ranges = json.loads((PROCESSED_DATA_DIR / "feature_ranges.json").read_text(encoding="utf-8"))
     model_meta = json.loads((MODELS_DIR / "model_metadata.json").read_text(encoding="utf-8"))
     return {
-        "train_df": train_df,
         "test_df": test_df,
-        "raw_df": raw_df,
         "model_table": model_table,
         "threshold_df": threshold_df,
         "naive_vs_smote": naive_vs_smote,
@@ -155,7 +151,6 @@ def extract_feature_importances(model_obj) -> np.ndarray | None:
 
 data = load_data()
 models = load_models()
-train_df = data["train_df"]
 test_df = data["test_df"]
 
 st.title("Credit Card Fraud Detection - Real-Time Transaction Risk Analyzer")
@@ -274,9 +269,9 @@ st.markdown(
 top_features = ["V14", "V10", "V12", "V4", "V11"]
 feature_ranges = data["feature_ranges"]
 feature_columns = data["model_meta"]["feature_columns"]
-feature_medians = train_df[feature_columns].median()
-feature_means = train_df[feature_columns].mean()
-feature_stds = train_df[feature_columns].std().replace(0, 1.0)
+feature_medians = test_df[feature_columns].median()
+feature_means = test_df[feature_columns].mean()
+feature_stds = test_df[feature_columns].std().replace(0, 1.0)
 
 random_col, controls_col = st.columns([1, 2])
 with random_col:

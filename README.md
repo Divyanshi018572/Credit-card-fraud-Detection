@@ -1,6 +1,21 @@
-# Credit Card Fraud Detection
+---
+title: Credit Card Fraud Detection
+emoji: 💳
+colorFrom: red
+colorTo: green
+sdk: streamlit
+app_file: app.py
+pinned: false
+---
 
+# Credit Card Fraud Detection
 End-to-end machine learning project for extreme class imbalance fraud detection using the ULB Kaggle dataset (`creditcard.csv`) with no synthetic external dataset.
+
+## High-Level System Design
+
+The project is split into two primary components: an offline machine learning pipeline for processing data and training models, and a real-time Streamlit application for transaction risk scoring.
+
+For a detailed visual breakdown of the architecture, data flow, and risk decision engine, please see the [System Design Document](SYSTEM_DESIGN.md).
 
 ## Project Structure
 
@@ -94,6 +109,20 @@ Run Streamlit app:
 
 ```powershell
 .\.venv\Scripts\streamlit run app.py
+```
+
+## Docker (Optimized Runtime)
+
+Build:
+
+```powershell
+docker build -t credit-card-fraud-app .
+```
+
+Run:
+
+```powershell
+docker run --rm -p 8501:8501 credit-card-fraud-app
 ```
 
 ## Streamlit App Sections
