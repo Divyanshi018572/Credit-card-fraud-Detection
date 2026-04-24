@@ -1,4 +1,5 @@
 name: Sync to Hugging Face hub
+
 on:
   push:
     branches: [main]
@@ -8,13 +9,65 @@ jobs:
   sync-to-hub:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-      - name: Install Hugging Face Hub CLI
-        run: pip install huggingface_hub
-      - name: Push to hub
-        run: huggingface-cli upload Divya499/Credit-card-fraud_detection . . --repo-type space --exclude ".git/*" --exclude "__pycache__/*" --exclude ".github/*" --token ${{ secrets.HF_TOKEN }}
+          python-version: "3.10"
 
+      - name: Install huggingface_hub
+        run: pip install huggingface_hub
+
+      - name: Sync code files to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'EOF'
+          import os
+          from huggingface_hub import HfApi, CommitOperationAdd
+
+          token = os.environ["HF_TOKEN"]
+          api = HfApi(token=token)
+          repo_id = "Divya499/Credit-card-fraud_detection"
+
+          # Only sync lightweight code/config files.
+          # Large binary files (models/*.pkl, data/processed/*.csv) are
+          # already on HF and are excluded here to keep the action fast.
+          files_to_sync = [
+              "app.py",
+              "path_utils.py",
+              "requirements.txt",
+              "README.md",
+              "SYSTEM_DESIGN.md",
+          ]
+
+          operations = []
+          for f in files_to_sync:
+              if os.path.exists(f):
+                  operations.append(
+                      CommitOperationAdd(path_in_repo=f, path_or_fileobj=f)
+                  )
+                  print(f"Queued: {f}")
+
+          # Sync outputs folder (plots/images — small files)
+          for root, dirs, files in os.walk("outputs"):
+              for file in files:
+                  path = os.path.join(root, file)
+                  path_in_repo = path.replace("\\", "/")
+                  operations.append(
+                      CommitOperationAdd(
+                          path_in_repo=path_in_repo, path_or_fileobj=path
+                      )
+                  )
+                  print(f"Queued: {path_in_repo}")
+
+          api.create_commit(
+              repo_id=repo_id,
+              repo_type="space",
+              operations=operations,
+              commit_message="Sync code files from GitHub",
+          )
+          print("Sync complete!")
+          EOF
