@@ -9,11 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          fetch-depth: 0
-          lfs: true
+          python-version: '3.10'
+      - name: Install Hugging Face Hub CLI
+        run: pip install huggingface_hub
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push --force https://Divya499:$HF_TOKEN@huggingface.co/spaces/Divya499/Credit-card-fraud_detection main
-
+        run: huggingface-cli upload Divya499/Credit-card-fraud_detection . . --repo-type space
