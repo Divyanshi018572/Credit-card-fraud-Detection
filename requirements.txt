@@ -7,3 +7,10 @@ seaborn
 xgboost
 streamlit
 joblib
+PyYAML
+fastapi
+uvicorn
+pydantic
+pytest
+httpx
+mlflow

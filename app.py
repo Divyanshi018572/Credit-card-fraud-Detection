@@ -10,108 +10,61 @@ import streamlit as st
 from sklearn.metrics import confusion_matrix
 
 from path_utils import MODELS_DIR, OUTPUTS_DIR, PROCESSED_DATA_DIR
+from src.utils.config_loader import load_config
 
+# Load global configuration
+config = load_config()
 
 st.set_page_config(
-    page_title="Credit Card Fraud Detection - Real-Time Transaction Risk Analyzer",
-    layout="wide",
-)
-
-st.markdown(
-    """
-    <style>
-    .stApp { background: radial-gradient(circle at 20% 20%, #1b1f24, #0d1117 60%); color: #f2f5f7; }
-    h1, h2, h3 { color: #f2f5f7 !important; }
-    [data-testid="stSidebar"] { background: #111827; }
-    .risk-high { color: #ff4d4f; font-weight: 700; }
-    .risk-low { color: #4ade80; font-weight: 700; }
-    .block { color: #ff4d4f; font-weight: 700; }
-    .approve { color: #4ade80; font-weight: 700; }
-    .model-card {
-        border: 1px solid #2b3440;
-        border-radius: 12px;
-        padding: 12px 14px;
-        margin-bottom: 10px;
-        background: linear-gradient(160deg, #101826 0%, #0f172a 100%);
-    }
-    .model-card.active {
-        border: 1px solid #34d399;
-        box-shadow: 0 0 0 1px #34d399 inset;
-        background: linear-gradient(160deg, #062018 0%, #0f172a 100%);
-    }
-    .model-title {
-        font-weight: 700;
-        font-size: 16px;
-        margin-bottom: 2px;
-    }
-    .model-sub {
-        color: #94a3b8;
-        font-size: 12px;
-        margin-bottom: 8px;
-    }
-    .model-metrics {
-        color: #e2e8f0;
-        font-size: 12px;
-        line-height: 1.4;
-    }
-    .pred-box {
-        border: 1px solid #334155;
-        border-radius: 12px;
-        padding: 14px;
-        background: #0b1220;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-
+...
 @st.cache_data
 def load_data() -> dict:
-    test_df = pd.read_csv(PROCESSED_DATA_DIR / "test.csv")
-    model_table = pd.read_csv(OUTPUTS_DIR / "model_comparison_table.csv", index_col=0)
-    threshold_df = pd.read_csv(OUTPUTS_DIR / "xgb_threshold_metrics.csv")
-    naive_vs_smote = pd.read_csv(OUTPUTS_DIR / "naive_vs_smote_metrics.csv")
-    model_test_probs = pd.read_csv(OUTPUTS_DIR / "model_test_probabilities.csv")
-    score_df = pd.read_csv(OUTPUTS_DIR / "test_scores.csv")
-    eda_summary = json.loads((OUTPUTS_DIR / "eda_summary.json").read_text(encoding="utf-8"))
-    feature_ranges = json.loads((PROCESSED_DATA_DIR / "feature_ranges.json").read_text(encoding="utf-8"))
-    model_meta = json.loads((MODELS_DIR / "model_metadata.json").read_text(encoding="utf-8"))
-    return {
-        "test_df": test_df,
-        "model_table": model_table,
-        "threshold_df": threshold_df,
-        "naive_vs_smote": naive_vs_smote,
-        "model_test_probs": model_test_probs,
-        "score_df": score_df,
-        "eda_summary": eda_summary,
-        "feature_ranges": feature_ranges,
-        "model_meta": model_meta,
-    }
-
-
+    """
+    Loads all precomputed data artifacts for the dashboard.
+    
+    Returns:
+        dict: Collection of dataframes and metadata.
+    """
+...
 @st.cache_resource
 def load_models() -> dict:
-    return {
-        "Isolation Forest": joblib.load(MODELS_DIR / "isolation_forest.pkl"),
-        "One-Class SVM": joblib.load(MODELS_DIR / "one_class_svm.pkl"),
-        "Random Forest + SMOTE": joblib.load(MODELS_DIR / "random_forest_smote.pkl"),
-        "XGBoost + SMOTE + Threshold": joblib.load(MODELS_DIR / "xgboost_fraud.pkl"),
-        "scaler": joblib.load(MODELS_DIR / "log_amount_scaler.pkl"),
-    }
-
-
+    """
+    Loads serialized model and scaler objects.
+    
+    Returns:
+        dict: Collection of joblib-loaded models.
+    """
+...
 def risk_tier(probability: float) -> str:
-    if probability >= 0.8:
+    """
+    Maps a fraud probability to a business risk tier based on config thresholds.
+    
+    Args:
+        probability (float): Raw model output probability.
+        
+    Returns:
+        str: Risk category (Critical, High, Medium, Low).
+    """
+    tiers = config["business_logic"]["risk_tiers"]
+    if probability >= tiers["critical"]:
         return "Critical"
-    if probability >= 0.6:
+    if probability >= tiers["high"]:
         return "High"
-    if probability >= 0.35:
+    if probability >= tiers["medium"]:
         return "Medium"
     return "Low"
 
 
 def decision_action(tier: str) -> str:
+    """
+    Recommends a business action based on the risk tier.
+    
+    Args:
+        tier (str): Risk category.
+        
+    Returns:
+        str: Recommended action (Block, Flag, Approve).
+    """
     if tier in {"Critical", "High"}:
         return "Block Transaction"
     if tier == "Medium":

@@ -17,3 +17,19 @@ models/*.pkl
 # OS/editor noise
 .DS_Store
 Thumbs.db
+
+# MLflow experiments
+mlruns/
+
+# Test caches
+.pytest_cache/
+
+# Deployment scripts with secrets
+upload_commit.py
+upload_script.py
+
+# Output artifacts
+outputs/*
+!outputs/*.json
+!outputs/*.csv
+!outputs/.gitkeep

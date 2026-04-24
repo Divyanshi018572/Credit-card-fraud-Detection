@@ -9,7 +9,6 @@
   "xgb_best_cv_f1": 0.7523364900805699,
   "xgb_best_threshold": 0.28500000000000003,
   "xgb_global_best_threshold": 0.88,
-  "threshold_source": "validation_split",
   "feature_columns": [
     "V1",
     "V2",

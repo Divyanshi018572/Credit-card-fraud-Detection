@@ -1,0 +1,59 @@
+# Project-wide Configuration
+
+paths:
+  raw_data: "data/raw/creditcard.csv"
+  processed_dir: "data/processed"
+  models_dir: "models"
+  outputs_dir: "outputs"
+
+preprocessing:
+  test_size: 0.2
+  random_state: 42
+  smote:
+    sampling_strategy: 0.1
+    random_state: 42
+
+models:
+  isolation_forest:
+    n_estimators: 200
+    contamination: 0.0017
+    random_state: 42
+    n_jobs: 1
+
+  one_class_svm:
+    kernel: "rbf"
+    nu: 0.0017  # fraud_rate
+    gamma: "scale"
+    subsample_size: 50000
+
+  random_forest:
+    n_estimators: 400
+    max_depth: 14
+    min_samples_leaf: 2
+    random_state: 42
+    n_jobs: 1
+    class_weight: "balanced"
+
+  xgboost:
+    objective: "binary:logistic"
+    eval_metric: "logloss"
+    random_state: 42
+    n_jobs: 1
+    tree_method: "hist"
+    
+  tuning:
+    n_iter: 6
+    cv: 3
+    random_state: 42
+    param_distributions:
+      n_estimators: [200, 300, 400]
+      max_depth: [3, 4, 5, 6]
+      learning_rate: [0.01, 0.03, 0.05, 0.1]
+      subsample: [0.7, 0.8, 0.9, 1.0]
+      scale_pos_weight: [300, 400, 500, 578, 700]
+
+business_logic:
+  risk_tiers:
+    critical: 0.8
+    high: 0.6
+    medium: 0.35
