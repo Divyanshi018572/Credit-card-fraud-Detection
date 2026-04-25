@@ -55,7 +55,7 @@ For a detailed visual breakdown of the architecture, data flow, and risk decisio
 └── path_utils.py
 ```
 
-## 🛠️ Engineering Maturity (Score: 9.4/10)
+## 🛠️ Engineering Maturity
 
 This project has been refactored from a procedural prototype to a **Production-Ready MLOps System**:
 
